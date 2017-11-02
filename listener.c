@@ -9,7 +9,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <termios.h>
 
 union semun {
     int val;
@@ -40,14 +39,6 @@ int main(void)
     }
     data = shmat(shmid, (void *) 0, 0);
 
-    struct termios old_term, new_term;
-    tcgetattr(0, &old_term); //save current port settings
-    new_term = old_term;
-    new_term.c_lflag &= ~ICANON;
-    new_term.c_lflag &= ~ECHO;
-    tcflush(0, TCIFLUSH);
-    tcsetattr(0, TCSANOW, &new_term);
-
     // Print data
     char *buff = malloc(1024 * sizeof(char));
     while (1) {
@@ -57,16 +48,11 @@ int main(void)
         // Check for EOT
         if (buff[0] == 0x04) {
             break;
-        } else if (*buff) {
-            //printf("%c\n", buff);
-            printf("%c", buff[0]);
-            fflush(stdout);
-        }
+        } else if (*buff)
+            printf("%s\n", buff);
     }
 
     // Cleanup
-    putchar('\n');
-    tcsetattr(0, TCSANOW, &old_term);
     free(buff);
     shmdt(data);
     // shmctl(shmid, IPC_RMID, NULL);
