@@ -1,0 +1,6 @@
+dispatcher
+listener
+*.swp
+*.o
+a.out
+.gdb*
