@@ -39,6 +39,14 @@ int main(void)
     }
     data = shmat(shmid, (void *) 0, 0);
 
+    struct termios saved_termios, new_termios;
+    tcgetattr(0, &saved_termios); //save current port settings
+    new_termios = saved_termios;
+    new_termios.c_lflag &= ~ICANON;
+    new_termios.c_lflag &= ~ECHO;
+    tcflush(0, TCIFLUSH);
+    tcsetattr(0, TCSANOW, &new_termios);
+
     // Print data
     char *buff = malloc(1024 * sizeof(char));
     while (1) {
@@ -53,6 +61,8 @@ int main(void)
     }
 
     // Cleanup
+    putchar('\n');
+    tcsetattr(0, TCSANOW, &saved_termios);
     free(buff);
     shmdt(data);
     // shmctl(shmid, IPC_RMID, NULL);

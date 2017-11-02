@@ -27,6 +27,15 @@ int main(void)
     data = shmat(shmid, (void *) 0, 0);
     memset(data, '\0', 1024);
 
+    /* Set termios settings */
+    struct termios saved_termios, new_termios;
+    tcgetattr(0, &saved_termios);
+    new_termios = saved_termios;
+    new_termios.c_lflag &= ~(ICANON);
+    new_termios.c_lflag &= ~(ECHO);
+    tcflush(0, TCIFLUSH);
+    tcsetattr(0, TCSANOW, &new_termios);
+
     /* Get input */
     int c;
     short pos = 0;
@@ -50,6 +59,7 @@ int main(void)
         pos++;
     }
 
+    tcsetattr(0, TCSANOW, &saved_termios);
     shmdt(data);
     shmctl(shmid, IPC_RMID, NULL);
 
