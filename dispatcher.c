@@ -8,6 +8,7 @@
 #include <sys/sem.h>
 #include <string.h>
 #include <unistd.h>
+#include <termios.h>
 
 int main(void)
 {
@@ -42,19 +43,17 @@ int main(void)
     char buff[128];
     while (1) {
         c = getchar();
-        if (c == EOF) {
+        if (c == 0x04) {
             data[0] = 0x04;
             break;
-        } else if (c == '\n') {
-            buff[pos] = '\0';
-            pos = 0;
+        } else {
+            // TODO: overflow here
+            putchar(c);
+            buff[pos] = c;
             strcpy(data, buff);
             usleep(5000);
             memset(data, 0, 1024);
             continue;
-        } else {
-            // TODO: overflow here
-            buff[pos] = c;
         }
         pos++;
     }

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <termios.h>
 
 union semun {
     int val;
@@ -56,8 +57,11 @@ int main(void)
         // Check for EOT
         if (buff[0] == 0x04) {
             break;
-        } else if (*buff)
-            printf("%s\n", buff);
+        } else if (*buff) {
+            //printf("%c\n", buff);
+            printf("%c", buff[0]);
+            fflush(stdout);
+        }
     }
 
     // Cleanup
