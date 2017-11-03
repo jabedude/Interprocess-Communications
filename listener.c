@@ -19,13 +19,6 @@ union semun {
 
 int main(void)
 {
-    /* Get access to semaphore set */
-    // key_t semkey;
-    // int semid;
-    // union semun arg;
-    // semkey = ftok("/", 'E');
-    // semid = semget(semkey, 1, 0);
-
     // Get shm
     key_t key;
     int shmid;
@@ -41,7 +34,7 @@ int main(void)
     data = shmat(shmid, (void *) 0, 0);
 
     struct termios saved_termios, new_termios;
-    tcgetattr(0, &saved_termios); //save current port settings
+    tcgetattr(0, &saved_termios);
     new_termios = saved_termios;
     new_termios.c_lflag &= ~ICANON;
     new_termios.c_lflag &= ~ECHO;
@@ -69,8 +62,6 @@ int main(void)
     tcsetattr(0, TCSANOW, &saved_termios);
     free(buff);
     shmdt(data);
-    // shmctl(shmid, IPC_RMID, NULL);
-    // semctl(semid, 0, IPC_RMID, arg);
 
     return 0;
 }

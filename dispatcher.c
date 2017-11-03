@@ -12,13 +12,6 @@
 
 int main(void)
 {
-    /* Create semaphore set */
-    // key_t semkey;
-    // int semid;
-    // semkey = ftok("/", 'E');
-    // semid = semget(semkey, 1, IPC_CREAT | 0644);
-    // semctl(semkey, 1, SETALL, 0);
-
     /* Create the shm */
     key_t key;
     int shmid;
