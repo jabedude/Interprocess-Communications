@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <termios.h>
 
+#include "relay.h"
+
 union semun {
     int val;
     struct semid_ds *buf;
@@ -25,7 +27,7 @@ int main(void)
     char *data;
 
     key = ftok("/", 'R');
-    shmid = shmget(key, 1024, IPC_EXCL | 0644);
+    shmid = shmget(key, SHM_SIZE, IPC_EXCL | 0644);
     if (shmid < 0) {
         perror("shmget");
         fprintf(stderr, "Please start the dispatcher then try again.\n");
@@ -36,23 +38,23 @@ int main(void)
     struct termios saved_termios, new_termios;
     tcgetattr(0, &saved_termios);
     new_termios = saved_termios;
-    new_termios.c_lflag &= ~ICANON;
-    new_termios.c_lflag &= ~ECHO;
+    new_termios.c_lflag &= ~(ICANON);
+    new_termios.c_lflag &= ~(ECHO);
     tcflush(0, TCIFLUSH);
     tcsetattr(0, TCSANOW, &new_termios);
 
     // Print data
-    char *buff = malloc(1024 * sizeof(char));
+    int c;
     while (1) {
-        memcpy(buff, data, 1024);
-        usleep(5000);
+        c = *data;
+        usleep(SLEEP_TM);
 
         // Check for EOT
-        if (buff[0] == 0x04) {
+        if (c == 0x04) {
             break;
-        } else if (*buff) {
+        } else if (c) {
             //printf("%c\n", buff);
-            printf("%c", buff[0]);
+            printf("%c", c);
             fflush(stdout);
         }
     }
@@ -60,7 +62,6 @@ int main(void)
     // Cleanup
     putchar('\n');
     tcsetattr(0, TCSANOW, &saved_termios);
-    free(buff);
     shmdt(data);
 
     return 0;

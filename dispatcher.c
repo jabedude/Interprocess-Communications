@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <termios.h>
 
+#include "relay.h"
+
 int main(void)
 {
     /* Create the shm */
@@ -17,9 +19,9 @@ int main(void)
     int shmid;
     char *data;
     key = ftok("/", 'R');
-    shmid = shmget(key, 1024, IPC_CREAT | 0644);
+    shmid = shmget(key, SHM_SIZE, IPC_CREAT | 0644);
     data = shmat(shmid, (void *) 0, 0);
-    memset(data, '\0', 1024);
+    memset(data, '\0', SHM_SIZE);
 
     /* Set termios settings */
     struct termios saved_termios, new_termios;
@@ -32,23 +34,19 @@ int main(void)
 
     /* Get input */
     int c;
-    short pos = 0;
-    char buff[128];
     while (1) {
         c = getchar();
         if (c == 0x04) {
-            data[0] = 0x04;
+            *data = 0x04;
             break;
         } else {
             // TODO: overflow here
             putchar(c);
-            buff[pos] = c;
-            strcpy(data, buff);
-            usleep(5000);
-            memset(data, 0, 1024);
+            *data = c;
+            usleep(SLEEP_TM);
+            *data = '\0';
             continue;
         }
-        pos++;
     }
 
     tcsetattr(0, TCSANOW, &saved_termios);
