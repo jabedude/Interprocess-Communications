@@ -49,6 +49,7 @@ int main(void)
         }
     }
 
+    putchar('\n');
     tcsetattr(0, TCSANOW, &saved_termios);
     shmdt(data);
     shmctl(shmid, IPC_RMID, NULL);
