@@ -1,13 +1,7 @@
 #define _XOPEN_SOURCE
 #define _XOPEN_SOURCE_EXTENDED
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <termios.h>
 
 #include "relay.h"
 

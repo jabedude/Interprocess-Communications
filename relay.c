@@ -11,8 +11,7 @@ void unbuf_term(struct termios *savt, struct termios *newt)
     for (size_t i = 0; i < sizeof(newt->c_cc); i++) {
         newt->c_cc[i] = savt->c_cc[i];
     }
-    newt->c_lflag &= ~(ICANON);
-    newt->c_lflag &= ~(ECHO);
+    newt->c_lflag &= ~(ICANON | ECHO);
     tcflush(0, TCIFLUSH);
     tcsetattr(0, TCSANOW, newt);
 }
