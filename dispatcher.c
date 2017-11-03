@@ -5,8 +5,6 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <sys/sem.h>
-#include <string.h>
 #include <unistd.h>
 #include <termios.h>
 
@@ -21,7 +19,7 @@ int main(void)
     key = ftok("/", 'R');
     shmid = shmget(key, SHM_SIZE, IPC_CREAT | 0644);
     data = shmat(shmid, (void *) 0, 0);
-    memset(data, '\0', SHM_SIZE);
+    *data = '\0';
 
     /* Set termios settings */
     struct termios saved_termios, new_termios;
@@ -40,7 +38,6 @@ int main(void)
             *data = 0x04;
             break;
         } else {
-            // TODO: overflow here
             putchar(c);
             *data = c;
             usleep(SLEEP_TM);

@@ -5,19 +5,11 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <sys/sem.h>
-#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <termios.h>
 
 #include "relay.h"
-
-union semun {
-    int val;
-    struct semid_ds *buf;
-    short *array;
-};
 
 int main(void)
 {
@@ -25,7 +17,6 @@ int main(void)
     key_t key;
     int shmid;
     char *data;
-
     key = ftok("/", 'R');
     shmid = shmget(key, SHM_SIZE, IPC_EXCL | 0644);
     if (shmid < 0) {
@@ -35,6 +26,7 @@ int main(void)
     }
     data = shmat(shmid, (void *) 0, 0);
 
+    // Set up terminal settings
     struct termios saved_termios, new_termios;
     tcgetattr(0, &saved_termios);
     new_termios = saved_termios;
@@ -53,7 +45,6 @@ int main(void)
         if (c == 0x04) {
             break;
         } else if (c) {
-            //printf("%c\n", buff);
             printf("%c", c);
             fflush(stdout);
         }
