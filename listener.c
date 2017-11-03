@@ -28,12 +28,7 @@ int main(void)
 
     // Set up terminal settings
     struct termios saved_termios, new_termios;
-    tcgetattr(0, &saved_termios);
-    new_termios = saved_termios;
-    new_termios.c_lflag &= ~(ICANON);
-    new_termios.c_lflag &= ~(ECHO);
-    tcflush(0, TCIFLUSH);
-    tcsetattr(0, TCSANOW, &new_termios);
+    unbuf_term(&saved_termios, &new_termios);
 
     // Print data
     int c;

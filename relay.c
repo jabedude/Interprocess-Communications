@@ -1,12 +1,18 @@
+#include <string.h>
+
 #include "relay.h"
 
 
-void unbuf_term(struct termios *saved_termios, struct termios *new_termios)
+void unbuf_term(struct termios *savt, struct termios *newt)
 {
-    tcgetattr(0, saved_termios);
-    new_termios = saved_termios;
-    new_termios.c_lflag &= ~(ICANON);
-    new_termios.c_lflag &= ~(ECHO);
+    tcgetattr(0, savt);
+    // Deep copy termios
+    memcpy(newt, savt, sizeof(struct termios));
+    for (size_t i = 0; i < sizeof(newt->c_cc); i++) {
+        newt->c_cc[i] = savt->c_cc[i];
+    }
+    newt->c_lflag &= ~(ICANON);
+    newt->c_lflag &= ~(ECHO);
     tcflush(0, TCIFLUSH);
-    tcsetattr(0, TCSANOW, new_termios);
+    tcsetattr(0, TCSANOW, newt);
 }

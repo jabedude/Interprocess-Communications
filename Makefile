@@ -7,12 +7,12 @@ CFLAGS+=-std=c11
 
 BINS=dispatcher listener
 
-DEPS1=dispatcher.o
-DEPS2=listener.o
+DEPS1=dispatcher.o relay.o
+DEPS2=listener.o relay.o
 
 all: $(BINS)
-IPC_Server: $(DEPS1)
-IPC_Client: $(DEPS2)
+dispatcher: $(DEPS1)
+listener: $(DEPS2)
 
 debug: CFLAGS+=-g
 debug: $(BINS)
