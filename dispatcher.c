@@ -12,7 +12,7 @@
 
 int main(void)
 {
-    /* Create the shm */
+    // Create the shm
     key_t key;
     int shmid;
     char *data;
@@ -21,11 +21,11 @@ int main(void)
     data = shmat(shmid, (void *) 0, 0);
     *data = '\0';
 
-    /* Set termios settings */
+    // Set termios settings
     struct termios saved_termios, new_termios;
     unbuf_term(&saved_termios, &new_termios);
 
-    /* Get input */
+    // Get input
     int c;
     while (1) {
         c = getchar();
@@ -41,6 +41,7 @@ int main(void)
         }
     }
 
+    // Cleanup
     putchar('\n');
     tcsetattr(0, TCSANOW, &saved_termios);
     shmdt(data);
