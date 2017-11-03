@@ -22,16 +22,14 @@ int main(void)
     unbuf_term(&saved_termios, &new_termios);
 
     // Print data
-    int c;
     while (1) {
-        c = *data;
         usleep(SLEEP_TM);
 
         // Check for EOT
-        if (c == 0x04) {
+        if (*data == 0x04) {
             break;
-        } else if (c) {
-            printf("%c", c);
+        } else if (*data) {
+            printf("%c", *data);
             fflush(stdout);
         }
     }

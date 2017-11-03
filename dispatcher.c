@@ -25,18 +25,13 @@ int main(void)
     signal(SIGINT, _int_hand);
 
     // Get input
-    int c;
     while (1) {
-        c = getchar();
-        if (c == 0x04) {
-            *data = 0x04;
+        if ((*data = getchar()) == 0x04) {
             break;
         } else {
-            putchar(c);
-            *data = c;
+            putchar(*data);
             usleep(SLEEP_TM);
             *data = '\0';
-            continue;
         }
     }
 
