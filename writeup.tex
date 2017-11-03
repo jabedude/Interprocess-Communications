@@ -68,30 +68,20 @@ The data flow from \textbf{dispatcher} to \textbf{listener} is as follows:
 \begin{center}
 \begin{equation}
 \begin{tikzpicture}[node distance = 2cm, auto]
-    \tikzstyle{decision} = [diamond, draw, fill=yellow!20, 
-    text width=4.5em, text badly centered, node distance=2.3cm, inner sep=0pt]
+    text width=4.5em, text badly centered, inner sep=0pt]
     \tikzstyle{block} = [rectangle, draw, fill=blue!20, 
     text width=11em, text centered, rounded corners, minimum height=3em]
     \tikzstyle{line} = [draw, -latex']
-    \tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
-    minimum height=2em]
-    \node [block] (commands) {Command line read};
-    \node [cloud, right of=commands, node distance=5cm] (sender) {Sender};
-    \node [block, below of=commands] (sethandlers) {Set signal handlers};
-    \node [block, below of=sethandlers] (evaluate) {Create timer thread};
-    \node [block, below of=evaluate] (request) {Print time and prime number};
-    \node [decision, below of=request] (keepmining) {Still in valid range?};
-    \node [block, left of=evaluate, node distance=5cm] (anotherpath)
-    {Generate another prime number};
-    \node [block, below of=keepmining, node distance=3cm] (return) {Terminate};
-    \path [line] (commands) -- (sethandlers);
-    \path [line] (sethandlers) -- (evaluate);
-    \path [line] (evaluate) -- (request);
-    \path [line] (request) -- (keepmining);
-    \path [line,dashed] (sender) |- node [midway, below] {SIGNAL} (request);
-    \path [line] (keepmining) -| node [near start] {yes} (anotherpath);
-    \path [line] (anotherpath) |- (sethandlers);
-    \path [line] (keepmining) -- node {no}(return);
+    \tikzstyle{cloud} = [draw, ellipse,fill=red!20, minimum height=2em]
+    \node [block] (dispatcher) {Dispatcher};
+    \node [cloud, below of=dispatcher] (memory) {Shared Memory};
+    \node [block, below of=memory] (listen2) {Listener 2};
+    \node [block, right of=listen2, node distance = 5cm] (listen3) {Listener 3};
+    \node [block, left of=listen2, node distance = 5cm] (listen1) {Listener 1};
+    \path [line] (dispatcher) -- (memory) node [midway] {Create and push data};
+    \path [line, dashed] (listen1) -- (memory);
+    \path [line, dashed] (listen2) -- (memory);
+    \path [line, dashed] (listen3) -- (memory);
 \end{tikzpicture}
 \end{equation}
 \end{center}
