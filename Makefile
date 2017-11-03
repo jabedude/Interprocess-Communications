@@ -1,7 +1,7 @@
 CFLAGS+=-Wall -Wextra -Wpedantic
 CFLAGS+=-Wwrite-strings -Wstack-usage=1024 -Wfloat-equal
 CFLAGS+=-Waggregate-return -Winline
-CFLAGS+=-std=c11
+CFLAGS+=-std=c11 -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 
 .PHONY: clean debug profile
 

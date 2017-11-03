@@ -1,8 +1,6 @@
 #ifndef _RELAY_H
 #define _RELAY_H
 
-#define _XOPEN_SOURCE
-#define _XOPEN_SOURCE_EXTENDED
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ipc.h>

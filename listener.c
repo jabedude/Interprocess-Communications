@@ -1,6 +1,3 @@
-#define _XOPEN_SOURCE
-#define _XOPEN_SOURCE_EXTENDED
-
 #include <stdlib.h>
 
 #include "relay.h"
