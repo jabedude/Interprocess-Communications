@@ -1,4 +1,12 @@
+#include <signal.h>
+#include <stdbool.h>
 #include "relay.h"
+
+static void _int_hand(int _sig)
+{
+    _sig = _sig;
+    signal(SIGINT, _int_hand);
+}
 
 int main(void)
 {
@@ -14,6 +22,7 @@ int main(void)
     // Set termios settings
     struct termios saved_termios, new_termios;
     unbuf_term(&saved_termios, &new_termios);
+    signal(SIGINT, _int_hand);
 
     // Get input
     int c;
