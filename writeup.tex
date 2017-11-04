@@ -27,9 +27,10 @@
 \end{flushleft}
 
 The relay project aims to create two programs that communicate via Interprocess 
-Communication.  This IPC will be one-way, from a "\textbf{dispatcher}" program 
-that takes input from standard input to a "\textbf {listener}" program that 
-prints text sent to the first program.
+Communication.  This IPC will be one-way, sending input from a
+"\textbf{dispatcher}" program 
+that takes input from standard input to a "\textbf {listener}" program which 
+then prints text sent to the first program.
 \vspace{.5pc}
 
 \begin{flushleft}
@@ -55,6 +56,13 @@ prints text sent to the first program.
 The project is composed of the following files:
 \begin{itemize}
 	\item [$\cdot$] \textit{Makefile}: The main makefile for the project.
+	\item [$\cdot$] \textit{dispatcher.c}: The source code for the 
+	\textbf{dispacher}.
+	\item [$\cdot$] \textit{listener.c}: The source code for the 
+	\textbf{listener}.
+	\item [$\cdot$] \textit{relay.c}: The source code with a helper function
+	used by both programs.
+	\item [$\cdot$] \textit{relay.h}: The header file for the project.
 \end{itemize}
 \vspace{2mm}
 
@@ -78,7 +86,7 @@ The data flow from \textbf{dispatcher} to \textbf{listener} is as follows:
     \node [block, below of=memory] (listen2) {Listener 2};
     \node [block, right of=listen2, node distance = 5cm] (listen3) {Listener 3};
     \node [block, left of=listen2, node distance = 5cm] (listen1) {Listener 1};
-    \path [line] (dispatcher) -- (memory) node [midway] {Create and push data};
+    \path [line] (dispatcher) -- (memory) node [midway] {Create, push, and delete byte};
     \path [line, dashed] (listen1) -- (memory);
     \path [line, dashed] (listen2) -- (memory);
     \path [line, dashed] (listen3) -- (memory);
@@ -86,15 +94,20 @@ The data flow from \textbf{dispatcher} to \textbf{listener} is as follows:
 \end{equation}
 \end{center}
 
-The basic flow of the signaler program is shown in figure 1.
-The signaler gets its command line arguments and sets the appropriate flags 
-and values.  It enters its main loop and sets its signal handlers.  Signaler
-spawns a timer thread to pause its execution for .8 seconds.  It then prints 
-the timestamp.  Lastly, signaler generates the next prime number in the 
-sequence to be printed.  We do so with Fermat's little theorem, seen below:
-We perform 4 rounds of the Fermat Primality Test.  This is a very fast and 
-performant calculation. While this might be overkill for relatively small 
-integers, this method will pay off when calculating extremely large primes.
+My project operates character by character, byte by byte on input from the 
+user. Input is given to the running dispatcher which has changed the terminal 
+settings to non-cannonical mode in order to get data unbuffered. Each 
+character is copied to the one byte shared memory segment then the dispatcher
+sleeps for 5000 nanoseconds. Then, the shared memory segment is set to NUL. 
+Before the shared memory is set to NUL, the listener prints the data and then 
+sleeps for 5000 nanoseconds. This loop is performed until the user gives a 
+control-D to the dispatcher. In order to prevent a control-C from prematurely
+ending the dispatcher (which would result in the shared memory segment not
+being deleted), a tiny SIGINT handler is used at the beginning of the program.
+The listeners test for the existence of the shared memory segment and if it 
+does not exist, the listener exits cleanly. Once the user sends a control-D to
+the dispatcher, the dispatcher sets the shared memory to EOT which is the 
+magical number that closes the listeners. 
 \vspace{.5pc}
 
 \begin{flushleft}
@@ -102,8 +115,8 @@ integers, this method will pay off when calculating extremely large primes.
 \vspace{.5pc}
 \end{flushleft}
 
-The signaler and sender communicated via signals. We specifically use the 
-SIGHUP, SIGUSR1, SIGUSR2, and SIGKILL. 
+The dispatcher and listener performed IPC via System V shared memory. This 
+communication was one-way and used exactly one byte of memory.  
 \vspace{.5pc}
 
 \begin{flushleft}
@@ -112,9 +125,12 @@ SIGHUP, SIGUSR1, SIGUSR2, and SIGKILL.
 \end{flushleft}
 
 \begin{itemize}
-	\item[$\bullet$] Prime generation taking too much time.
-	\item[$\bullet$] Incorrectly handling signals.
-	\item[$\bullet$] Pausing execution without sleep.
+	\item[$\bullet$] Listeners re-printing data in shared memory before it is 
+	deleted.
+	\item[$\bullet$] Listeners closing when user gives a control-D to the 
+	dispatcher.
+	\item[$\bullet$] Dispatcher not prematurely closing before sending EOT to
+	listeners. 
 \end{itemize}
 \vspace{.5pc}
 
@@ -125,14 +141,15 @@ SIGHUP, SIGUSR1, SIGUSR2, and SIGKILL.
 
 \textit{User Tests:}
 \begin{itemize}
-	\item[$\cdot$] Ran signaler and sender simultaneously.
-	\item[$\cdot$] Ran signaler and sent signals with bash kill command. 
+	\item[$\cdot$] Performed test specified in the project supplement manual.
+	\item[$\cdot$] Sent dispatcher a control-C in the middle of execution.
+	\item[$\cdot$] Checked system IPC mechanisms via the "ipcs" command to 
+	ensure that all shared memory is deleted after successful execution.
 \end{itemize}
 
 \textit{Test Cases:}
 \begin{itemize}
-	\item[$\cdot$] Unit tests for the prime number generation and Fermat's
-	Little Theorem.
+	\item[$\cdot$] Tested SIGINT handler and shared memory deletion.
 	\end{itemize}
 \vspace{.5pc}
 
@@ -141,12 +158,18 @@ SIGHUP, SIGUSR1, SIGUSR2, and SIGKILL.
 \vspace{.5pc}
 \end{flushleft}
 
-The signaler project has been challenging and a learning experience. I learned 
-about signals and threads while working on this project. Pausing execution 
-without sleep was a fun challenge to solve. While writing the signaler, I
-ran into bugs that were difficult to debug and required me to use GDB 
-extensively. One example was resetting the signal handler every time a signal
-was received. If I had more time to work on the project I would improve it
-by implementing a more robust prime number generator such as Miller-Rabin.
-Overall, it was a success and I am satisfied with what I wrote. 
+The relay project was a learning experience for me. I learned about the
+various IPC mechanisms that UNIX provides such as message queues, semaphores,
+shared memory, etc. I decided to utilize shared memory after reading the 
+textbook and deciding that this method was best for one way, multicast 
+communication. I initially planned on using semaphores for the dispatcher to 
+keep track of all listeners, however, I decided that it added unneeded 
+complexity and simply used the EOT character to terminate the listeners. 
+Throughout the development of the project, I chose to prioritize efficiency
+and simplicity in order to produce a fast, accurate program. This is why I 
+chose to operate character by character and to only use one byte of shared
+memory. I am very happy with the outcome. The only possible change for the 
+future would be to use a faster mechanism for getting data from the shared 
+memory. 
+
 \end{document}
